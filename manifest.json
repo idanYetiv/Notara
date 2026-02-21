@@ -1,8 +1,10 @@
 {
   "manifest_version": 3,
   "name": "Notara",
+  "short_name": "Notara",
   "description": "Floating sticky notes on any website with screenshot capture",
   "version": "1.0.0",
+  "homepage_url": "https://github.com/idanYetiv/Notara",
   "icons": {
     "16": "public/icon-16.png",
     "48": "public/icon-48.png",
