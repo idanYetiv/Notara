@@ -106,16 +106,18 @@ npm run test:run     # Single run tests
 
 ---
 
-## 7. Auth Architecture (Phase 1)
+## 7. Auth Architecture (Phase 1) ✅
 
 - **Google-only sign-in** via Supabase Auth + `chrome.identity.launchWebAuthFlow()`
-- **Supabase client** lives in background service worker only (`src/lib/supabase.ts`)
+- **Supabase client** lazy-initialized in background service worker (`src/lib/supabase.ts`) — safe when no `.env`
 - Uses custom `chrome.storage.local` adapter (service workers have no localStorage)
-- Popup/content scripts communicate with background via Chrome messaging (`SIGN_IN_GOOGLE`, `SIGN_OUT`, `GET_AUTH_STATE`)
-- User profile cached in `chrome.storage.session`; Supabase refresh token persisted in `chrome.storage.local`
-- Extension icon click opens popup (with auth UI + toggle button); no longer directly toggles panel
+- Content script communicates with background via Chrome messaging (`SIGN_IN_GOOGLE`, `SIGN_OUT`, `GET_AUTH_STATE`)
+- User profile cached in `chrome.storage.session`; Supabase refresh token in `chrome.storage.local`
+- Extension icon click toggles floating panel; sign-in UI lives inside the panel
+- **Panel is gated behind auth** — not signed in = only sign-in screen; signed in = full panel
+- Nonce flow: raw nonce → SHA-256 hash sent to Google → raw nonce sent to Supabase for verification
 - **Phase 1 = auth only** — notes stay in chrome.storage, no DB sync yet
-- Credentials set via `.env` (see `.env.example`); requires Supabase project + Google Cloud Console setup
+- Credentials: `.env` (see `.env.example`) — Supabase project + Google Cloud Console configured
 
 ---
 
