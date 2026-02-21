@@ -1,8 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import type { Alert, Note, NoteColor, NoteScope } from "../../lib/types";
+import type { Alert, AlertSchedule, Note, NoteColor, NoteScope } from "../../lib/types";
 import { NOTE_COLORS } from "../../lib/types";
 import { useScreenshot } from "../../hooks/useScreenshot";
 import { FREE_NOTE_LIMIT } from "../../lib/freemium";
+import { saveGlobalAlert } from "../../lib/storage";
+import GlobalPanel from "./GlobalPanel";
+import ScheduleModal from "./ScheduleModal";
 
 interface FloatingPanelProps {
   notes: Note[];
@@ -132,6 +135,8 @@ export default function FloatingPanel({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingAlertId, setEditingAlertId] = useState<string | null>(null);
   const [colorPickerId, setColorPickerId] = useState<string | null>(null);
+  const [globalPanelOpen, setGlobalPanelOpen] = useState(false);
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const { onMouseDown, wasDragged } = useDrag(panelRef);
 
@@ -152,6 +157,23 @@ export default function FloatingPanel({
   const handleAddAlert = async () => {
     const alert = await onAddAlert(autoScope);
     setEditingAlertId(alert.id);
+  };
+
+  const handleScheduleAlertSave = async (message: string, schedule: AlertSchedule) => {
+    const now = Date.now();
+    const alert: Alert = {
+      id: crypto.randomUUID(),
+      url: "",
+      scope: "global",
+      message,
+      enabled: true,
+      schedule,
+      createdAt: now,
+      updatedAt: now,
+    };
+    await saveGlobalAlert(alert);
+    chrome.runtime.sendMessage({ type: "SCHEDULE_ALERT", alert });
+    setScheduleModalOpen(false);
   };
 
   // --- Hidden — nothing rendered, reopen via extension icon ---
@@ -243,6 +265,7 @@ export default function FloatingPanel({
 
   // --- Expanded panel ---
   return (
+    <>
     <div
       ref={panelRef}
       style={{
@@ -258,12 +281,26 @@ export default function FloatingPanel({
         fontFamily: "system-ui, -apple-system, sans-serif",
         display: "flex",
         flexDirection: "column",
-        overflow: "hidden",
+        overflow: "visible",
         border: "1px solid #2a2a40",
         direction: "ltr",
         textAlign: "left" as const,
       }}
     >
+      {/* Global management panel (left side) */}
+      {globalPanelOpen && (
+        <GlobalPanel onClose={() => setGlobalPanelOpen(false)} />
+      )}
+
+      {/* Inner content wrapper — clips overflow while outer allows GlobalPanel */}
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        maxHeight: "500px",
+        overflow: "hidden",
+        borderRadius: "16px",
+      }}>
       {/* Header — draggable */}
       <div
         onMouseDown={onMouseDown}
@@ -294,25 +331,47 @@ export default function FloatingPanel({
             {notes.length} / {FREE_NOTE_LIMIT}
           </span>
         </div>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setOpen(false);
-          }}
-          onMouseDown={(e) => e.stopPropagation()}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            fontSize: "18px",
-            color: "#64748b",
-            padding: "0 4px",
-            lineHeight: 1,
-          }}
-          title="Minimize"
-        >
-          {"\u2212"}
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setGlobalPanelOpen((p) => !p);
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            style={{
+              background: globalPanelOpen ? "rgba(0,212,255,0.15)" : "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "16px",
+              color: globalPanelOpen ? "#00d4ff" : "#64748b",
+              padding: "2px 6px",
+              lineHeight: 1,
+              borderRadius: "6px",
+            }}
+            title="Global management panel"
+          >
+            {"\u{1F4CB}"}
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen(false);
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "18px",
+              color: "#64748b",
+              padding: "0 4px",
+              lineHeight: 1,
+            }}
+            title="Minimize"
+          >
+            {"\u2212"}
+          </button>
+        </div>
       </div>
 
       {/* Location + add buttons */}
@@ -351,6 +410,17 @@ export default function FloatingPanel({
             style={addBtnStyle("#1a1a2e", "#00d4ff")}
           >
             {"\uD83D\uDD14"} Add Alert
+          </button>
+        </div>
+        <div style={{ marginTop: "6px" }}>
+          <button
+            onClick={() => setScheduleModalOpen(true)}
+            style={{
+              ...addBtnStyle("#1a1a2e", "#00d4ff"),
+              width: "100%",
+            }}
+          >
+            {"\u23F0"} Schedule Alert
           </button>
         </div>
       </div>
@@ -442,7 +512,15 @@ export default function FloatingPanel({
           </>
         )}
       </div>
+      </div>{/* end inner content wrapper */}
     </div>
+    {scheduleModalOpen && (
+      <ScheduleModal
+        onSave={handleScheduleAlertSave}
+        onCancel={() => setScheduleModalOpen(false)}
+      />
+    )}
+    </>
   );
 }
 
