@@ -1,6 +1,6 @@
 import { getNoteCountForUrl, migrateFromWebNoter, getAllAlerts } from "../lib/storage";
 import type { Alert, AlertSchedule, MessageAction } from "../lib/types";
-import { supabase } from "../lib/supabase";
+import { getSupabase, isSupabaseConfigured } from "../lib/supabase";
 import { AUTH_STORAGE_KEY } from "../lib/auth";
 import type { UserProfile } from "../lib/auth";
 
@@ -94,14 +94,27 @@ async function findAlertByAlarmName(alarmName: string): Promise<Alert | null> {
 // --- Auth helpers ---
 
 async function handleGoogleSignIn(): Promise<{ success: boolean; user?: UserProfile; error?: string }> {
+  const supabase = getSupabase();
+  if (!supabase) {
+    return { success: false, error: "Auth not configured. Set up .env with Supabase credentials." };
+  }
+
   try {
     const redirectUrl = chrome.identity.getRedirectURL();
+    const nonce = crypto.randomUUID();
+    // Google embeds the hashed nonce in the id_token; Supabase hashes the raw nonce to compare.
+    // So we send the hash to Google and the raw nonce to Supabase.
+    const encoder = new TextEncoder();
+    const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(nonce));
+    const hashedNonce = Array.from(new Uint8Array(hashBuffer))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
     const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
     authUrl.searchParams.set("client_id", GOOGLE_CLIENT_ID);
     authUrl.searchParams.set("redirect_uri", redirectUrl);
     authUrl.searchParams.set("response_type", "id_token");
     authUrl.searchParams.set("scope", "openid email profile");
-    authUrl.searchParams.set("nonce", crypto.randomUUID());
+    authUrl.searchParams.set("nonce", hashedNonce);
 
     const responseUrl = await chrome.identity.launchWebAuthFlow({
       url: authUrl.toString(),
@@ -123,6 +136,7 @@ async function handleGoogleSignIn(): Promise<{ success: boolean; user?: UserProf
     const { data, error } = await supabase.auth.signInWithIdToken({
       provider: "google",
       token: idToken,
+      nonce,
     });
 
     if (error || !data.user) {
@@ -144,7 +158,10 @@ async function handleGoogleSignIn(): Promise<{ success: boolean; user?: UserProf
 }
 
 async function handleSignOut(): Promise<void> {
-  await supabase.auth.signOut();
+  const supabase = getSupabase();
+  if (supabase) {
+    await supabase.auth.signOut();
+  }
   await chrome.storage.session.remove(AUTH_STORAGE_KEY);
 }
 
@@ -156,16 +173,19 @@ async function getCurrentAuthState(): Promise<{ isAuthenticated: boolean; user: 
   }
 
   // Fallback: rehydrate from Supabase persisted session
-  const { data } = await supabase.auth.getSession();
-  if (data.session?.user) {
-    const user: UserProfile = {
-      id: data.session.user.id,
-      email: data.session.user.email ?? "",
-      name: data.session.user.user_metadata?.full_name ?? data.session.user.email ?? "",
-      avatarUrl: data.session.user.user_metadata?.avatar_url ?? "",
-    };
-    await chrome.storage.session.set({ [AUTH_STORAGE_KEY]: user });
-    return { isAuthenticated: true, user };
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data } = await supabase.auth.getSession();
+    if (data.session?.user) {
+      const user: UserProfile = {
+        id: data.session.user.id,
+        email: data.session.user.email ?? "",
+        name: data.session.user.user_metadata?.full_name ?? data.session.user.email ?? "",
+        avatarUrl: data.session.user.user_metadata?.avatar_url ?? "",
+      };
+      await chrome.storage.session.set({ [AUTH_STORAGE_KEY]: user });
+      return { isAuthenticated: true, user };
+    }
   }
 
   return { isAuthenticated: false, user: null };
@@ -173,6 +193,7 @@ async function getCurrentAuthState(): Promise<{ isAuthenticated: boolean; user: 
 
 // Rehydrate auth on service worker startup
 async function rehydrateAuth(): Promise<void> {
+  if (!isSupabaseConfigured) return;
   await getCurrentAuthState();
 }
 
@@ -259,6 +280,13 @@ chrome.runtime.onMessage.addListener(
     }
   }
 );
+
+// Extension icon click — toggle panel (only fires when popup is empty, i.e. user is signed in)
+chrome.action.onClicked.addListener((tab) => {
+  if (tab.id) {
+    chrome.tabs.sendMessage(tab.id, { type: "TOGGLE_PANEL" });
+  }
+});
 
 // Update badge when tab becomes active
 chrome.tabs.onActivated?.addListener(async (activeInfo) => {

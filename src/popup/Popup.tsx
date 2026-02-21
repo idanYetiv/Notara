@@ -48,16 +48,6 @@ export default function Popup() {
     }
   }
 
-  async function handleTogglePanel() {
-    const [tab] = await chrome.tabs.query({
-      active: true,
-      currentWindow: true,
-    });
-    if (tab?.id) {
-      chrome.tabs.sendMessage(tab.id, { type: "TOGGLE_PANEL" });
-    }
-  }
-
   const totalNotes = groups.reduce((sum, g) => sum + g.items.length, 0);
 
   return (
@@ -76,24 +66,16 @@ export default function Popup() {
       {/* Auth section */}
       <AuthSection {...auth} />
 
-      {/* Action buttons */}
-      <div className="p-3 flex gap-2">
+      {/* Add note button */}
+      <div className="p-3">
         <button
           onClick={handleAddNote}
           disabled={atLimit}
-          className="flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full py-2 px-4 rounded-lg font-medium text-sm transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
           style={{ backgroundColor: "#1a1a2e", color: atLimit ? "#64748b" : "#00d4ff", border: "1px solid #2a2a40" }}
           title={atLimit ? `Note limit reached (${FREE_NOTE_LIMIT})` : undefined}
         >
-          {atLimit ? `Limit (${FREE_NOTE_LIMIT})` : "+ Add Note"}
-        </button>
-        <button
-          onClick={handleTogglePanel}
-          className="py-2 px-4 rounded-lg font-medium text-sm transition-colors cursor-pointer"
-          style={{ backgroundColor: "#1a1a2e", color: "#94a3b8", border: "1px solid #2a2a40" }}
-          title="Toggle Notes on Page"
-        >
-          Toggle Notes
+          {atLimit ? `Limit reached (${FREE_NOTE_LIMIT} notes)` : "+ Add Note to Current Page"}
         </button>
       </div>
 

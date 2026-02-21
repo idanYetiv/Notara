@@ -6,6 +6,7 @@ const DEFAULT_STATE: AuthState = { isAuthenticated: false, user: null, loading: 
 
 export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>(DEFAULT_STATE);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchAuthState = useCallback(() => {
     chrome.runtime.sendMessage({ type: "GET_AUTH_STATE" }, (response) => {
@@ -37,9 +38,11 @@ export function useAuth() {
   }, [fetchAuthState]);
 
   function signIn() {
+    setError(null);
     setAuthState((prev) => ({ ...prev, loading: true }));
     chrome.runtime.sendMessage({ type: "SIGN_IN_GOOGLE" }, (response) => {
       if (chrome.runtime.lastError || !response?.success) {
+        setError(response?.error ?? chrome.runtime.lastError?.message ?? "Sign-in failed");
         setAuthState((prev) => ({ ...prev, loading: false }));
         return;
       }
@@ -58,5 +61,5 @@ export function useAuth() {
     });
   }
 
-  return { ...authState, signIn, signOut };
+  return { ...authState, error, signIn, signOut };
 }
