@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notara Demo — See It in Action</title>
+  <link rel="icon" type="image/png" href="../public/icon-128.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-1: #0a0a14;
+      --bg-2: #12121f;
+      --bg-3: #1a1a2e;
+      --accent: #00d4ff;
+      --accent-glow: rgba(0, 212, 255, 0.35);
+      --text: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --card-border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg-1);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    h1 span { color: var(--accent); }
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    /* --- Steps container --- */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      max-width: 700px;
+      width: 100%;
+    }
+
+    .step {
+      opacity: 0;
+      transform: translateY(30px);
+      animation: stepIn 0.8s ease forwards;
+    }
+    .step:nth-child(1) { animation-delay: 0.5s; }
+    .step:nth-child(2) { animation-delay: 2.5s; }
+    .step:nth-child(3) { animation-delay: 4.5s; }
+    .step:nth-child(4) { animation-delay: 6.5s; }
+    .step:nth-child(5) { animation-delay: 8.5s; }
+
+    @keyframes stepIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .step-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: var(--bg-1);
+      font-weight: 700;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+
+    .step-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    /* --- Browser mockup --- */
+    .browser {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.03);
+      box-shadow: 0 16px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .browser-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--card-border);
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot:nth-child(1) { background: #ff5f57; }
+    .dot:nth-child(2) { background: #ffbd2e; }
+    .dot:nth-child(3) { background: #28c840; }
+    .url-bar {
+      flex: 1;
+      margin-left: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .browser-body {
+      position: relative;
+      height: 260px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.005) 100%);
+      overflow: hidden;
+    }
+
+    /* Fake page content lines */
+    .page-lines {
+      position: absolute;
+      top: 24px; left: 32px; right: 32px;
+      height: 160px;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 8px,
+        transparent 8px, transparent 20px
+      );
+      border-radius: 4px;
+    }
+
+    /* --- Step-specific mockup elements --- */
+
+    /* Step 1: Install — CWS badge */
+    .cws-badge {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-3);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px 28px;
+    }
+    .cws-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .cws-text { display: flex; flex-direction: column; gap: 2px; }
+    .cws-name { font-weight: 700; font-size: 0.95rem; }
+    .cws-btn {
+      background: var(--accent);
+      color: var(--bg-1);
+      border: none;
+      border-radius: 6px;
+      padding: 4px 14px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: default;
+    }
+
+    /* Step 2: Panel slide-in */
+    .mock-panel {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      bottom: 12px;
+      width: 200px;
+      background: var(--bg-2);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: -4px 0 24px rgba(0,0,0,0.4);
+      opacity: 0;
+      transform: translateX(20px);
+      animation: panelSlide 0.6s ease forwards;
+      animation-delay: 3.2s;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    @keyframes panelSlide {
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .panel-header {
+      padding: 10px 12px;
+      background: var(--bg-3);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .panel-logo { font-size: 0.8rem; font-weight: 700; color: var(--accent); }
+    .panel-badge { font-size: 0.6rem; background: rgba(0,212,255,0.15); padding: 1px 6px; border-radius: 8px; color: var(--accent); }
+    .panel-body { padding: 10px 12px; flex: 1; }
+    .panel-btn {
+      width: 100%;
+      padding: 6px;
+      background: var(--bg-3);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 6px;
+      color: var(--accent);
+      font-size: 0.65rem;
+      font-weight: 500;
+      cursor: default;
+      text-align: center;
+    }
+    .panel-empty {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.6rem;
+      margin-top: 16px;
+    }
+
+    /* Step 3: Note card appears */
+    .mock-note {
+      position: absolute;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.7rem;
+      line-height: 1.5;
+      color: var(--bg-1);
+      font-weight: 500;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+      opacity: 0;
+      animation: noteFloat 0.6s ease forwards;
+    }
+    @keyframes noteFloat {
+      from { opacity: 0; transform: scale(0.85) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .note-yellow {
+      background: #fbbf24;
+      top: 50px; right: 220px; width: 150px;
+      animation-delay: 5.3s;
+    }
+    .note-cursor {
+      position: absolute;
+      bottom: -2px;
+      right: 6px;
+      font-size: 0.6rem;
+      opacity: 0;
+      animation: cursorBlink 1s step-end infinite;
+      animation-delay: 5.6s;
+      color: var(--bg-1);
+    }
+    @keyframes cursorBlink {
+      50% { opacity: 1; }
+    }
+
+    /* Step 4: Color & screenshot */
+    .note-green {
+      background: #34d399;
+      top: 50px; right: 220px; width: 150px;
+      animation-delay: 7.3s;
+    }
+    .mock-screenshot {
+      width: 100%;
+      height: 40px;
+      background: linear-gradient(135deg, rgba(0,0,0,0.15), rgba(0,0,0,0.05));
+      border-radius: 4px;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.55rem;
+      color: rgba(0,0,0,0.4);
+    }
+
+    /* Step 5: Come back later — note persists */
+    .note-persistent {
+      background: #34d399;
+      top: 50px; right: 30px; width: 150px;
+      animation-delay: 9.3s;
+    }
+    .time-badge {
+      position: absolute;
+      top: 12px;
+      left: 32px;
+      background: var(--bg-3);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.65rem;
+      color: var(--text-secondary);
+      opacity: 0;
+      animation: stepIn 0.5s ease forwards;
+      animation-delay: 9.6s;
+    }
+    .time-badge span { color: var(--accent); font-weight: 600; }
+
+    /* --- Footer --- */
+    .footer {
+      margin-top: 60px;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>See <span>Notara</span> in Action</h1>
+  <p class="subtitle">5 steps. Pure CSS. Hit record and share.</p>
+
+  <div class="steps">
+
+    <!-- Step 1: Install -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-badge">1</div>
+        <div class="step-title">Install from Chrome Web Store</div>
+      </div>
+      <div class="browser">
+        <div class="browser-bar">
+          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          <div class="url-bar">chrome.google.com/webstore</div>
+        </div>
+        <div class="browser-body">
+          <div class="cws-badge">
+            <div class="cws-icon">N</div>
+            <div class="cws-text">
+              <div class="cws-name">Notara</div>
+              <button class="cws-btn">Add to Chrome</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Open Panel -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-badge">2</div>
+        <div class="step-title">Open the Panel on Any Page</div>
+      </div>
+      <div class="browser">
+        <div class="browser-bar">
+          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          <div class="url-bar">docs.example.com/research</div>
+        </div>
+        <div class="browser-body">
+          <div class="page-lines"></div>
+          <div class="mock-panel">
+            <div class="panel-header">
+              <span class="panel-logo">Notara</span>
+              <span class="panel-badge">0 / 20</span>
+            </div>
+            <div class="panel-body">
+              <div class="panel-btn">+ Add Note</div>
+              <div class="panel-empty">No notes on this page yet.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Create Note -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-badge">3</div>
+        <div class="step-title">Create a Note Right Where You Need It</div>
+      </div>
+      <div class="browser">
+        <div class="browser-bar">
+          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          <div class="url-bar">docs.example.com/research</div>
+        </div>
+        <div class="browser-body">
+          <div class="page-lines"></div>
+          <div class="mock-note note-yellow">
+            Remember to cite this section in the report
+            <span class="note-cursor">|</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Color & Screenshot -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-badge">4</div>
+        <div class="step-title">Pick a Color &amp; Attach a Screenshot</div>
+      </div>
+      <div class="browser">
+        <div class="browser-bar">
+          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          <div class="url-bar">docs.example.com/research</div>
+        </div>
+        <div class="browser-body">
+          <div class="page-lines"></div>
+          <div class="mock-note note-green">
+            Key findings for Q4 review
+            <div class="mock-screenshot">📷 screenshot.jpg</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: Come Back Later -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-badge">5</div>
+        <div class="step-title">Come Back Later — Notes Are Waiting</div>
+      </div>
+      <div class="browser">
+        <div class="browser-bar">
+          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          <div class="url-bar">docs.example.com/research</div>
+        </div>
+        <div class="browser-body">
+          <div class="page-lines"></div>
+          <div class="time-badge">🕐 <span>3 days later...</span></div>
+          <div class="mock-note note-persistent">
+            Key findings for Q4 review
+            <div class="mock-screenshot">📷 screenshot.jpg</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <p><a href="index.html">← Back to Notara</a></p>
+  </div>
+
+</body>
+</html>

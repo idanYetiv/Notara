@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notara — Chrome Web Store Assets</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a14;
+    color: #e2e8f0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    padding: 40px;
+  }
+
+  h1 {
+    color: #00d4ff;
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 40px;
+  }
+
+  .asset-label {
+    color: #94a3b8;
+    font-size: 13px;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .asset-wrapper {
+    margin-bottom: 48px;
+    display: inline-block;
+  }
+
+  .asset-dimensions {
+    color: #64748b;
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
+
+  /* ===== SCREENSHOT FRAMES ===== */
+  .screenshot {
+    width: 1280px;
+    height: 800px;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid #2a2a40;
+    border-radius: 4px;
+  }
+
+  .promo-tile {
+    width: 440px;
+    height: 280px;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid #2a2a40;
+    border-radius: 4px;
+  }
+
+  /* ===== COMMON ELEMENTS ===== */
+
+  /* Fake browser chrome */
+  .browser-bar {
+    height: 40px;
+    background: #1e1e2e;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 8px;
+    border-bottom: 1px solid #2a2a40;
+  }
+  .browser-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+  }
+  .browser-dot.red { background: #ff5f57; }
+  .browser-dot.yellow { background: #febc2e; }
+  .browser-dot.green { background: #28c840; }
+  .browser-url {
+    flex: 1;
+    margin-left: 12px;
+    background: #12121f;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: #94a3b8;
+    border: 1px solid #2a2a40;
+  }
+
+  /* Sticky note base */
+  .sticky-note {
+    position: absolute;
+    border-radius: 8px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    cursor: default;
+    overflow: hidden;
+  }
+  .sticky-note .note-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+    font-size: 12px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    min-height: 24px;
+  }
+  .sticky-note .note-toolbar .toolbar-actions {
+    display: flex; gap: 6px; align-items: center;
+  }
+  .sticky-note .note-toolbar .toolbar-btn {
+    opacity: 0.6; cursor: pointer; font-size: 12px;
+  }
+  .sticky-note .note-content {
+    padding: 8px;
+    white-space: pre-wrap;
+  }
+  .sticky-note .resize-handle {
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 16px; height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: rgba(0,0,0,0.3);
+    cursor: nwse-resize;
+  }
+
+  /* Notara floating panel */
+  .notara-panel {
+    width: 320px;
+    background: #12121f;
+    border-radius: 16px;
+    border: 1px solid #2a2a40;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 24px rgba(0,212,255,0.15);
+    overflow: hidden;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .panel-header {
+    background: #1a1a2e;
+    padding: 12px 16px;
+    border-bottom: 1px solid #2a2a40;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .panel-title {
+    color: #00d4ff;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .panel-badge {
+    background: rgba(0,212,255,0.15);
+    color: #00d4ff;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .panel-location {
+    padding: 8px 16px;
+    font-size: 11px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border-bottom: 1px solid #2a2a40;
+  }
+  .panel-actions {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+    border-bottom: 1px solid #2a2a40;
+  }
+  .panel-action-btn {
+    flex: 1;
+    padding: 8px;
+    background: #1a1a2e;
+    border: 1px solid #2a2a40;
+    border-radius: 8px;
+    color: #00d4ff;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+  }
+  .panel-section-header {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 8px 12px 4px;
+  }
+  .note-card {
+    background: #1a1a2e;
+    border-radius: 10px;
+    margin: 0 12px 6px;
+    padding: 10px 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    position: relative;
+  }
+  .note-card-border {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 10px 0 0 10px;
+  }
+  .note-card-text {
+    font-size: 13px;
+    color: #e2e8f0;
+    line-height: 1.5;
+    margin-left: 6px;
+  }
+  .note-card-meta {
+    font-size: 10px;
+    color: #64748b;
+    margin-top: 4px;
+    margin-left: 6px;
+  }
+  .panel-footer {
+    padding: 8px 12px;
+    border-top: 1px solid #2a2a40;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+  .avatar-circle {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #2a2a40;
+    color: #00d4ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .sign-out-btn {
+    margin-left: auto;
+    font-size: 10px;
+    color: #64748b;
+    background: #12121f;
+    border: 1px solid #2a2a40;
+    padding: 2px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  /* Circle minimized button */
+  .notara-circle {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: #1a1a2e;
+    border: 3px solid #00d4ff;
+    box-shadow: 0 4px 16px rgba(0,212,255,0.15), 0 4px 16px rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #00d4ff;
+    font-weight: 700;
+    font-size: 16px;
+    position: absolute;
+  }
+
+  /* Color picker row */
+  .color-picker-row {
+    display: flex;
+    gap: 6px;
+    padding: 4px 8px;
+    align-items: center;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+  }
+  .color-dot {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.2);
+  }
+  .color-dot.selected {
+    border: 2px solid #333;
+  }
+
+  /* Tagline overlays */
+  .tagline-overlay {
+    position: absolute;
+    bottom: 40px;
+    left: 0; right: 0;
+    text-align: center;
+    z-index: 10;
+  }
+  .tagline-text {
+    display: inline-block;
+    background: rgba(18,18,31,0.92);
+    border: 1px solid #2a2a40;
+    padding: 14px 36px;
+    border-radius: 14px;
+    font-size: 26px;
+    font-weight: 700;
+    color: #e2e8f0;
+    letter-spacing: -0.02em;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 24px rgba(0,212,255,0.12);
+  }
+  .tagline-text .accent {
+    color: #00d4ff;
+  }
+
+  /* Fake webpage content */
+  .fake-page {
+    background: #ffffff;
+    height: 100%;
+    color: #1a1a2e;
+    padding: 60px 80px;
+  }
+  .fake-page.with-bar {
+    padding-top: 20px;
+    height: calc(100% - 40px);
+  }
+  .fake-page h2 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+  .fake-page .article-meta {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 20px;
+  }
+  .fake-page p {
+    font-size: 15px;
+    color: #475569;
+    line-height: 1.8;
+    margin-bottom: 16px;
+    max-width: 680px;
+  }
+  .fake-page .sidebar {
+    position: absolute;
+    right: 60px;
+    top: 120px;
+    width: 280px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .fake-page .sidebar h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 12px;
+  }
+  .fake-page .sidebar-item {
+    font-size: 13px;
+    color: #3b82f6;
+    padding: 6px 0;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  /* Sign-in specific */
+  .sign-in-container {
+    padding: 24px 16px;
+    text-align: center;
+  }
+  .sign-in-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+  }
+  .sign-in-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-bottom: 4px;
+  }
+  .sign-in-subtitle {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 24px;
+  }
+  .google-btn {
+    width: 100%;
+    padding: 10px;
+    background: #1a1a2e;
+    border: 1px solid #2a2a40;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+  .google-icon {
+    width: 16px; height: 16px;
+  }
+
+  /* Alert card */
+  .alert-card {
+    background: #1a1a2e;
+    border-radius: 10px;
+    margin: 0 12px 6px;
+    padding: 10px 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    border-left: 3px solid #00d4ff;
+  }
+  .alert-time {
+    font-size: 10px;
+    color: #00d4ff;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .alert-text {
+    font-size: 12px;
+    color: #e2e8f0;
+  }
+
+  /* Domain group */
+  .domain-group {
+    margin: 0 12px 8px;
+  }
+  .domain-header {
+    width: 100%;
+    padding: 6px 8px;
+    background: #1a1a2e;
+    border: 1px solid #2a2a40;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    margin-bottom: 4px;
+  }
+  .domain-arrow {
+    font-size: 10px;
+    color: #64748b;
+  }
+  .domain-count {
+    background: rgba(0,212,255,0.15);
+    color: #00d4ff;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+  }
+  .domain-notes {
+    margin-left: 8px;
+  }
+  .domain-note-item {
+    display: flex;
+    gap: 6px;
+    padding: 5px 8px;
+    margin-bottom: 2px;
+    background: #0a0a14;
+    border-radius: 6px;
+    font-size: 11px;
+    color: #e2e8f0;
+    align-items: flex-start;
+  }
+  .note-color-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-top: 3px;
+    flex-shrink: 0;
+  }
+  .scope-icon {
+    font-size: 10px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Tabs for global panel */
+  .panel-tabs {
+    display: flex;
+    border-bottom: 1px solid #2a2a40;
+  }
+  .panel-tab {
+    flex: 1;
+    padding: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: center;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    color: #64748b;
+  }
+  .panel-tab.active {
+    background: #1a1a2e;
+    border-bottom-color: #00d4ff;
+    color: #00d4ff;
+  }
+
+  /* cursor blink for editor */
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  .cursor-blink {
+    display: inline-block;
+    width: 2px;
+    height: 16px;
+    background: #1a1a2e;
+    animation: blink 1s infinite;
+    vertical-align: text-bottom;
+    margin-left: 1px;
+  }
+
+  /* Notara logo text */
+  .notara-logo {
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+</style>
+</head>
+<body>
+
+<h1>Notara — Chrome Web Store Assets</h1>
+<p class="subtitle">Open in Chrome. Right-click each asset &rarr; Inspect &rarr; Screenshot node, or use DevTools device mode for pixel-perfect captures.</p>
+
+<!-- ============================================================ -->
+<!-- SCREENSHOT 1: Hero — "Sticky notes on any website" -->
+<!-- ============================================================ -->
+<div class="asset-wrapper">
+  <div class="asset-label">Screenshot 1 — Hero</div>
+  <div class="asset-dimensions">1280 &times; 800</div>
+  <div class="screenshot" id="screenshot-1">
+    <!-- Browser bar -->
+    <div class="browser-bar">
+      <div class="browser-dot red"></div>
+      <div class="browser-dot yellow"></div>
+      <div class="browser-dot green"></div>
+      <div class="browser-url">blog.example.com/productivity-tips-for-2026</div>
+    </div>
+
+    <!-- Fake article page -->
+    <div class="fake-page with-bar" style="position: relative;">
+      <h2>10 Productivity Tips That Actually<br>Work in 2026</h2>
+      <div class="article-meta">By Sarah Chen &middot; Feb 18, 2026 &middot; 8 min read</div>
+      <p>In a world of constant distractions, staying productive requires more than just willpower. The most effective strategies combine intentional focus with the right tools to capture ideas when they strike.</p>
+      <p>Whether you're researching for a project, planning your week, or just browsing and finding inspiration, having a way to annotate and revisit your thoughts is essential. Here are the techniques that top performers swear by...</p>
+      <p>1. <strong>Capture ideas immediately.</strong> Don't rely on memory. The best insights happen when you least expect them &mdash; while reading an article, reviewing a document, or exploring new topics online.</p>
+      <p>2. <strong>Organize by context.</strong> Group your notes by where you found them. This builds a natural knowledge graph that mirrors how your brain works, making retrieval effortless.</p>
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <h3>Trending Articles</h3>
+        <div class="sidebar-item">The Future of Remote Work</div>
+        <div class="sidebar-item">Building Better Habits</div>
+        <div class="sidebar-item">Digital Minimalism Guide</div>
+        <div class="sidebar-item">Focus Music Playlists</div>
+      </div>
+
+      <!-- Sticky note 1: Yellow -->
+      <div class="sticky-note" style="left: 620px; top: 80px; width: 220px; background: #ca8a04; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <div class="note-toolbar">
+          <div class="toolbar-actions">
+            <span class="toolbar-btn">&#x25CB;</span>
+            <span class="toolbar-btn">&#x1F310;</span>
+            <span class="toolbar-btn">&#x1F3A8;</span>
+          </div>
+          <span class="toolbar-btn">&times;</span>
+        </div>
+        <div class="note-content" style="color: #1a1a00;">Great tip! Try this for the DAYO project sprint planning</div>
+        <div class="resize-handle">&#x27CB;</div>
+      </div>
+
+      <!-- Sticky note 2: Blue -->
+      <div class="sticky-note" style="left: 100px; top: 320px; width: 240px; background: #3b82f6; box-shadow: 0 4px 12px rgba(59,130,246,0.3);">
+        <div class="note-toolbar">
+          <div class="toolbar-actions">
+            <span class="toolbar-btn">&#x25CB;</span>
+            <span class="toolbar-btn">&#x1F310;</span>
+            <span class="toolbar-btn">&#x1F3A8;</span>
+          </div>
+          <span class="toolbar-btn">&times;</span>
+        </div>
+        <div class="note-content" style="color: #eef4ff;">Research: compare this with Pomodoro technique studies from Nature 2025</div>
+        <div class="resize-handle">&#x27CB;</div>
+      </div>
+
+      <!-- Sticky note 3: Green -->
+      <div class="sticky-note" style="left: 780px; top: 340px; width: 200px; background: #22c55e; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <div class="note-toolbar">
+          <div class="toolbar-actions">
+            <span class="toolbar-btn">&#x25CB;</span>
+            <span class="toolbar-btn">&#x1F310;</span>
+            <span class="toolbar-btn">&#x1F3A8;</span>
+          </div>
+          <span class="toolbar-btn">&times;</span>
+        </div>
+        <div class="note-content" style="color: #052e16;">TODO: Share this article with the team on Monday</div>
+        <div class="resize-handle">&#x27CB;</div>
+      </div>
+
+      <!-- Notara panel (minimized circle) -->
+      <div class="notara-circle" style="right: 24px; bottom: 24px;">N</div>
+    </div>
+
+    <!-- Tagline overlay -->
+    <div class="tagline-overlay">
+      <div class="tagline-text">Sticky notes on <span class="accent">any website</span></div>
+    </div>
+  </div>
+</div>
+
+<br>
+
+<!-- ============================================================ -->
+<!-- SCREENSHOT 2: Note Editor — Color picker open -->
+<!-- ============================================================ -->
+<div class="asset-wrapper">
+  <div class="asset-label">Screenshot 2 — Note Editor</div>
+  <div class="asset-dimensions">1280 &times; 800</div>
+  <div class="screenshot" id="screenshot-2" style="background: #f1f5f9;">
+    <!-- Browser bar -->
+    <div class="browser-bar">
+      <div class="browser-dot red"></div>
+      <div class="browser-dot yellow"></div>
+      <div class="browser-dot green"></div>
+      <div class="browser-url">docs.example.com/project-roadmap</div>
+    </div>
+
+    <!-- Subtle background page -->
+    <div class="fake-page with-bar" style="position: relative; background: #f8fafc;">
+      <div style="max-width: 700px; margin: 40px auto;">
+        <h2 style="font-size: 24px; color: #94a3b8;">Project Roadmap 2026</h2>
+        <div style="height: 12px;"></div>
+        <div style="background: #e2e8f0; height: 14px; width: 80%; border-radius: 4px; margin-bottom: 10px;"></div>
+        <div style="background: #e2e8f0; height: 14px; width: 95%; border-radius: 4px; margin-bottom: 10px;"></div>
+        <div style="background: #e2e8f0; height: 14px; width: 70%; border-radius: 4px; margin-bottom: 10px;"></div>
+        <div style="background: #e2e8f0; height: 14px; width: 88%; border-radius: 4px; margin-bottom: 24px;"></div>
+        <div style="background: #e2e8f0; height: 14px; width: 75%; border-radius: 4px; margin-bottom: 10px;"></div>
+        <div style="background: #e2e8f0; height: 14px; width: 92%; border-radius: 4px; margin-bottom: 10px;"></div>
+        <div style="background: #e2e8f0; height: 14px; width: 65%; border-radius: 4px; margin-bottom: 10px;"></div>
+      </div>
+
+      <!-- Featured sticky note — large, with color picker open -->
+      <div class="sticky-note" style="left: 380px; top: 140px; width: 520px; background: #e11d48; box-shadow: 0 8px 32px rgba(225,29,72,0.35); z-index: 5;">
+        <div class="note-toolbar" style="font-size: 13px;">
+          <div class="toolbar-actions">
+            <span class="toolbar-btn" style="opacity: 0.8;">&#x25CB;</span>
+            <span class="toolbar-btn" style="opacity: 0.8;">&#x1F310;</span>
+            <span class="toolbar-btn" style="opacity: 1; font-size: 14px;">&#x1F3A8;</span>
+            <span class="toolbar-btn" style="opacity: 0.8;">&#x1F4F7;</span>
+          </div>
+          <span class="toolbar-btn" style="font-size: 16px; opacity: 0.7;">&times;</span>
+        </div>
+        <!-- Color picker row (open) -->
+        <div class="color-picker-row">
+          <div class="color-dot" style="background: #ca8a04;"></div>
+          <div class="color-dot selected" style="background: #e11d48;"></div>
+          <div class="color-dot" style="background: #3b82f6;"></div>
+          <div class="color-dot" style="background: #22c55e;"></div>
+          <div class="color-dot" style="background: #8b5cf6;"></div>
+        </div>
+        <div class="note-content" style="color: #fff; font-size: 15px; padding: 12px 14px; min-height: 120px;">
+          Q1 milestone: Launch beta by March 15<br>
+          - Auth integration complete &#10003;<br>
+          - Need to finalize export feature<br>
+          - Schedule user testing sessions<span class="cursor-blink"></span>
+        </div>
+        <div class="resize-handle" style="color: rgba(255,255,255,0.3);">&#x27CB;</div>
+      </div>
+
+      <!-- Secondary note in the back -->
+      <div class="sticky-note" style="left: 120px; top: 200px; width: 220px; background: #8b5cf6; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 2; opacity: 0.85;">
+        <div class="note-toolbar">
+          <div class="toolbar-actions">
+            <span class="toolbar-btn">&#x25CB;</span>
+            <span class="toolbar-btn">&#x1F310;</span>
+          </div>
+          <span class="toolbar-btn">&times;</span>
+        </div>
+        <div class="note-content" style="color: #f3f0ff;">Check competitor pricing pages</div>
+        <div class="resize-handle" style="color: rgba(255,255,255,0.3);">&#x27CB;</div>
+      </div>
+    </div>
+
+    <!-- Tagline -->
+    <div class="tagline-overlay" style="bottom: 30px;">
+      <div class="tagline-text" style="font-size: 22px; padding: 12px 28px;">5 colors. <span class="accent">Your notes, your way.</span></div>
+    </div>
+  </div>
+</div>
+
+<br>
+
+<!-- ============================================================ -->
+<!-- SCREENSHOT 3: Sign In -->
+<!-- ============================================================ -->
+<div class="asset-wrapper">
+  <div class="asset-label">Screenshot 3 — Sign In</div>
+  <div class="asset-dimensions">1280 &times; 800</div>
+  <div class="screenshot" id="screenshot-3" style="background: #f1f5f9;">
+    <!-- Browser bar -->
+    <div class="browser-bar">
+      <div class="browser-dot red"></div>
+      <div class="browser-dot yellow"></div>
+      <div class="browser-dot green"></div>
+      <div class="browser-url">any-website.com</div>
+    </div>
+
+    <div class="fake-page with-bar" style="position: relative; background: #f8fafc;">
+      <!-- Blurred-like generic page content -->
+      <div style="max-width: 600px; margin: 30px 80px;">
+        <div style="background: #e2e8f0; height: 28px; width: 60%; border-radius: 6px; margin-bottom: 16px;"></div>
+        <div style="background: #e2e8f0; height: 12px; width: 90%; border-radius: 4px; margin-bottom: 8px;"></div>
+        <div style="background: #e2e8f0; height: 12px; width: 85%; border-radius: 4px; margin-bottom: 8px;"></div>
+        <div style="background: #e2e8f0; height: 12px; width: 75%; border-radius: 4px; margin-bottom: 20px;"></div>
+        <div style="background: #e2e8f0; height: 160px; width: 100%; border-radius: 8px; margin-bottom: 16px;"></div>
+        <div style="background: #e2e8f0; height: 12px; width: 88%; border-radius: 4px; margin-bottom: 8px;"></div>
+        <div style="background: #e2e8f0; height: 12px; width: 70%; border-radius: 4px; margin-bottom: 8px;"></div>
+        <div style="background: #e2e8f0; height: 12px; width: 92%; border-radius: 4px; margin-bottom: 8px;"></div>
+        <div style="background: #e2e8f0; height: 12px; width: 60%; border-radius: 4px;"></div>
+      </div>
+
+      <!-- Notara panel — sign-in screen -->
+      <div class="notara-panel" style="position: absolute; right: 24px; bottom: 24px; max-height: 500px;">
+        <div class="panel-header">
+          <span class="panel-title">Notara</span>
+        </div>
+        <div class="sign-in-container">
+          <div class="sign-in-icon">&#x1F4DD;</div>
+          <div class="sign-in-title">Welcome to Notara</div>
+          <div class="sign-in-subtitle">Sign in to save your notes across devices</div>
+          <div class="google-btn">
+            <!-- Google "G" icon -->
+            <svg class="google-icon" viewBox="0 0 24 24">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Continue with Google
+          </div>
+          <div style="margin-top: 16px; font-size: 11px; color: #64748b;">
+            Your notes are saved locally. Sign in to enable cloud sync.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tagline -->
+    <div class="tagline-overlay" style="bottom: 30px;">
+      <div class="tagline-text" style="font-size: 22px; padding: 12px 28px;">Get started in <span class="accent">one click</span></div>
+    </div>
+  </div>
+</div>
+
+<br>
+
+<!-- ============================================================ -->
+<!-- SCREENSHOT 4: Alerts & Organization -->
+<!-- ============================================================ -->
+<div class="asset-wrapper">
+  <div class="asset-label">Screenshot 4 — Alerts &amp; Organization</div>
+  <div class="asset-dimensions">1280 &times; 800</div>
+  <div class="screenshot" id="screenshot-4" style="background: #f1f5f9;">
+    <!-- Browser bar -->
+    <div class="browser-bar">
+      <div class="browser-dot red"></div>
+      <div class="browser-dot yellow"></div>
+      <div class="browser-dot green"></div>
+      <div class="browser-url">github.com/my-project/issues</div>
+    </div>
+
+    <div class="fake-page with-bar" style="position: relative; background: #f8fafc;">
+      <!-- Fake GitHub-ish page -->
+      <div style="max-width: 700px; margin: 20px 80px;">
+        <div style="background: #e2e8f0; height: 24px; width: 40%; border-radius: 6px; margin-bottom: 16px;"></div>
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+          <div style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; display: flex; gap: 8px; align-items: center;">
+            <div style="width: 16px; height: 16px; border-radius: 50%; background: #22c55e;"></div>
+            <div style="background: #e2e8f0; height: 12px; width: 50%; border-radius: 4px;"></div>
+            <div style="margin-left: auto; background: #e2e8f0; height: 12px; width: 60px; border-radius: 4px;"></div>
+          </div>
+          <div style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; display: flex; gap: 8px; align-items: center;">
+            <div style="width: 16px; height: 16px; border-radius: 50%; background: #e11d48;"></div>
+            <div style="background: #e2e8f0; height: 12px; width: 65%; border-radius: 4px;"></div>
+            <div style="margin-left: auto; background: #e2e8f0; height: 12px; width: 60px; border-radius: 4px;"></div>
+          </div>
+          <div style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; display: flex; gap: 8px; align-items: center;">
+            <div style="width: 16px; height: 16px; border-radius: 50%; background: #22c55e;"></div>
+            <div style="background: #e2e8f0; height: 12px; width: 45%; border-radius: 4px;"></div>
+            <div style="margin-left: auto; background: #e2e8f0; height: 12px; width: 60px; border-radius: 4px;"></div>
+          </div>
+          <div style="padding: 12px 16px; display: flex; gap: 8px; align-items: center;">
+            <div style="width: 16px; height: 16px; border-radius: 50%; background: #8b5cf6;"></div>
+            <div style="background: #e2e8f0; height: 12px; width: 55%; border-radius: 4px;"></div>
+            <div style="margin-left: auto; background: #e2e8f0; height: 12px; width: 60px; border-radius: 4px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notara panel with Global Panel drawer open -->
+      <div style="position: absolute; right: 24px; bottom: 24px; display: flex; align-items: flex-end;">
+        <!-- Global panel (left drawer) -->
+        <div style="width: 300px; background: #12121f; border: 1px solid #2a2a40; border-right: none; border-radius: 16px 0 0 16px; box-shadow: -4px 0 16px rgba(0,0,0,0.3); overflow: hidden; max-height: 480px;">
+          <div style="background: #1a1a2e; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #2a2a40;">
+            <span style="font-size: 14px; font-weight: 700; color: #00d4ff;">All Notes</span>
+            <span style="font-size: 12px; color: #64748b; cursor: pointer;">&times;</span>
+          </div>
+          <div class="panel-tabs">
+            <div class="panel-tab active">By Site</div>
+            <div class="panel-tab">Recent</div>
+          </div>
+          <div style="padding: 8px 0; overflow-y: auto;">
+            <!-- Domain: blog.example.com -->
+            <div class="domain-group">
+              <div class="domain-header">
+                <span><span class="domain-arrow">&#9660;</span> blog.example.com</span>
+                <span class="domain-count">3</span>
+              </div>
+              <div class="domain-notes">
+                <div class="domain-note-item">
+                  <div class="note-color-dot" style="background: #ca8a04;"></div>
+                  <span class="scope-icon">&#x1F310;</span>
+                  <span>Great tip! Try this for DAYO...</span>
+                </div>
+                <div class="domain-note-item">
+                  <div class="note-color-dot" style="background: #3b82f6;"></div>
+                  <span class="scope-icon">&#x1F4C4;</span>
+                  <span>Research: compare with Pomo...</span>
+                </div>
+                <div class="domain-note-item">
+                  <div class="note-color-dot" style="background: #22c55e;"></div>
+                  <span class="scope-icon">&#x1F4C4;</span>
+                  <span>TODO: Share this article...</span>
+                </div>
+              </div>
+            </div>
+            <!-- Domain: docs.example.com -->
+            <div class="domain-group">
+              <div class="domain-header">
+                <span><span class="domain-arrow">&#9654;</span> docs.example.com</span>
+                <span class="domain-count">2</span>
+              </div>
+            </div>
+            <!-- Domain: github.com -->
+            <div class="domain-group">
+              <div class="domain-header">
+                <span><span class="domain-arrow">&#9654;</span> github.com</span>
+                <span class="domain-count">1</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main panel -->
+        <div class="notara-panel" style="border-radius: 0 16px 16px 0; max-height: 480px; display: flex; flex-direction: column;">
+          <div class="panel-header">
+            <span class="panel-title">Notara</span>
+            <span class="panel-badge">1 note</span>
+          </div>
+          <div class="panel-location">
+            &#x1F4C4; github.com/my-project/issues
+          </div>
+          <div class="panel-actions">
+            <div class="panel-action-btn">+ Page Note</div>
+            <div class="panel-action-btn">+ Site Note</div>
+          </div>
+          <div class="panel-section-header">&#x1F514; Alerts</div>
+          <div class="alert-card">
+            <div class="alert-time">&#x23F0; Tomorrow, 9:00 AM</div>
+            <div class="alert-text">Review PR #42 before standup</div>
+          </div>
+          <div class="panel-section-header">Notes on this page</div>
+          <div class="note-card" style="margin-bottom: 12px;">
+            <div class="note-card-border" style="background: #8b5cf6;"></div>
+            <div class="note-card-text">Check issue priority labels — need to align with roadmap</div>
+            <div class="note-card-meta">&#x1F4C4; Page &middot; 2 hours ago</div>
+          </div>
+          <div class="panel-footer">
+            <div class="avatar-circle">I</div>
+            <span>idan@example.com</span>
+            <div class="sign-out-btn">Sign out</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tagline -->
+    <div class="tagline-overlay" style="bottom: 30px;">
+      <div class="tagline-text" style="font-size: 22px; padding: 12px 28px;">Organized by site. <span class="accent">Never lose a note.</span></div>
+    </div>
+  </div>
+</div>
+
+<br>
+
+<!-- ============================================================ -->
+<!-- SMALL PROMO TILE (440x280) -->
+<!-- ============================================================ -->
+<div class="asset-wrapper">
+  <div class="asset-label">Small Promo Tile</div>
+  <div class="asset-dimensions">440 &times; 280</div>
+  <div class="promo-tile" id="promo-tile" style="background: #12121f; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;">
+    <!-- Icon-like element -->
+    <div style="width: 72px; height: 72px; border-radius: 16px; background: linear-gradient(135deg, #1a1a2e 0%, #12121f 100%); border: 3px solid #00d4ff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 24px rgba(0,212,255,0.2);">
+      <span style="font-size: 36px; color: #00d4ff; font-weight: 700;">N</span>
+    </div>
+    <div>
+      <span class="notara-logo" style="color: #00d4ff;">Notara</span>
+    </div>
+    <div style="font-size: 15px; color: #94a3b8; font-weight: 500; letter-spacing: 0.01em;">
+      Floating sticky notes for any website
+    </div>
+    <!-- Decorative dots -->
+    <div style="display: flex; gap: 6px; margin-top: 4px;">
+      <div style="width: 8px; height: 8px; border-radius: 50%; background: #ca8a04;"></div>
+      <div style="width: 8px; height: 8px; border-radius: 50%; background: #e11d48;"></div>
+      <div style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></div>
+      <div style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e;"></div>
+      <div style="width: 8px; height: 8px; border-radius: 50%; background: #8b5cf6;"></div>
+    </div>
+  </div>
+</div>
+
+<br><br>
+
+<div style="color: #64748b; font-size: 12px; padding: 20px 0;">
+  <strong>How to capture pixel-perfect screenshots:</strong><br>
+  1. Open Chrome DevTools (F12) &rarr; Elements tab<br>
+  2. Click the asset's container div (e.g., the <code>.screenshot</code> or <code>.promo-tile</code> div)<br>
+  3. Right-click the element in the DOM tree &rarr; "Capture node screenshot"<br>
+  4. The PNG will be saved at exact pixel dimensions (1280&times;800 or 440&times;280)<br>
+  <br>
+  <em>Note: Make sure browser zoom is at 100% for accurate dimensions.</em>
+</div>
+
+</body>
+</html>
