@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { AuthState } from "../lib/auth";
 import { AUTH_STORAGE_KEY } from "../lib/auth";
+import { captureError } from "../lib/sentry";
 
 const DEFAULT_STATE: AuthState = { isAuthenticated: false, user: null, loading: true };
 
@@ -42,7 +43,9 @@ export function useAuth() {
     setAuthState((prev) => ({ ...prev, loading: true }));
     chrome.runtime.sendMessage({ type: "SIGN_IN_GOOGLE" }, (response) => {
       if (chrome.runtime.lastError || !response?.success) {
-        setError(response?.error ?? chrome.runtime.lastError?.message ?? "Sign-in failed");
+        const errorMsg = response?.error ?? chrome.runtime.lastError?.message ?? "Sign-in failed";
+        captureError(new Error(`Sign-in failed: ${errorMsg}`));
+        setError(errorMsg);
         setAuthState((prev) => ({ ...prev, loading: false }));
         return;
       }
@@ -55,10 +58,18 @@ export function useAuth() {
   }
 
   function signOut() {
-    setAuthState((prev) => ({ ...prev, loading: true }));
-    chrome.runtime.sendMessage({ type: "SIGN_OUT" }, () => {
+    try {
+      setAuthState((prev) => ({ ...prev, loading: true }));
+      chrome.runtime.sendMessage({ type: "SIGN_OUT" }, () => {
+        if (chrome.runtime.lastError) {
+          captureError(new Error(`Sign-out failed: ${chrome.runtime.lastError.message}`));
+        }
+        setAuthState({ isAuthenticated: false, user: null, loading: false });
+      });
+    } catch (err) {
+      captureError(err);
       setAuthState({ isAuthenticated: false, user: null, loading: false });
-    });
+    }
   }
 
   return { ...authState, error, signIn, signOut };

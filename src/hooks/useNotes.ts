@@ -8,6 +8,7 @@ import {
   changeNoteScope,
 } from "../lib/storage";
 import { canCreateNote } from "../lib/freemium";
+import { captureError } from "../lib/sentry";
 
 export function useNotes(url: string) {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -16,9 +17,14 @@ export function useNotes(url: string) {
 
   const loadNotes = useCallback(async () => {
     setLoading(true);
-    const loaded = await getNotesForUrl(url);
-    setNotes(loaded);
-    setLoading(false);
+    try {
+      const loaded = await getNotesForUrl(url);
+      setNotes(loaded);
+    } catch (err) {
+      captureError(err);
+    } finally {
+      setLoading(false);
+    }
   }, [url]);
 
   useEffect(() => {
@@ -27,37 +33,46 @@ export function useNotes(url: string) {
 
   const addNote = useCallback(
     async (scope: NoteScope = "page") => {
-      const check = await canCreateNote();
-      if (!check.allowed) {
-        setLimitReached(true);
+      try {
+        const check = await canCreateNote();
+        if (!check.allowed) {
+          setLimitReached(true);
+          return null;
+        }
+
+        const note: Note = {
+          id: crypto.randomUUID(),
+          url,
+          scope,
+          text: "",
+          color: "yellow",
+          position: {
+            x: 100 + Math.random() * 200,
+            y: 100 + Math.random() * 200,
+          },
+          size: { w: 240, h: 200 },
+          minimized: false,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+        await saveNote(note);
+        setNotes((prev) => [...prev, note]);
+        return note;
+      } catch (err) {
+        captureError(err);
         return null;
       }
-
-      const note: Note = {
-        id: crypto.randomUUID(),
-        url,
-        scope,
-        text: "",
-        color: "yellow",
-        position: {
-          x: 100 + Math.random() * 200,
-          y: 100 + Math.random() * 200,
-        },
-        size: { w: 240, h: 200 },
-        minimized: false,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      };
-      await saveNote(note);
-      setNotes((prev) => [...prev, note]);
-      return note;
     },
     [url]
   );
 
   const removeNote = useCallback(async (note: Note) => {
-    await deleteNote(note);
-    setNotes((prev) => prev.filter((n) => n.id !== note.id));
+    try {
+      await deleteNote(note);
+      setNotes((prev) => prev.filter((n) => n.id !== note.id));
+    } catch (err) {
+      captureError(err);
+    }
   }, []);
 
   const editNote = useCallback(
@@ -65,20 +80,28 @@ export function useNotes(url: string) {
       note: Note,
       updates: Partial<Omit<Note, "id" | "url" | "createdAt">>
     ) => {
-      await updateNote(note, updates);
-      setNotes((prev) =>
-        prev.map((n) =>
-          n.id === note.id ? { ...n, ...updates, updatedAt: Date.now() } : n
-        )
-      );
+      try {
+        await updateNote(note, updates);
+        setNotes((prev) =>
+          prev.map((n) =>
+            n.id === note.id ? { ...n, ...updates, updatedAt: Date.now() } : n
+          )
+        );
+      } catch (err) {
+        captureError(err);
+      }
     },
     []
   );
 
   const toggleScope = useCallback(async (note: Note) => {
-    const newScope: NoteScope = note.scope === "page" ? "site" : "page";
-    const updated = await changeNoteScope(note, newScope);
-    setNotes((prev) => prev.map((n) => (n.id === note.id ? updated : n)));
+    try {
+      const newScope: NoteScope = note.scope === "page" ? "site" : "page";
+      const updated = await changeNoteScope(note, newScope);
+      setNotes((prev) => prev.map((n) => (n.id === note.id ? updated : n)));
+    } catch (err) {
+      captureError(err);
+    }
   }, []);
 
   const changeColor = useCallback(

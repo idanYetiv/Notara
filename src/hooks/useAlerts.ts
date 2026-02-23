@@ -6,6 +6,7 @@ import {
   deleteAlert,
   updateAlert,
 } from "../lib/storage";
+import { captureError } from "../lib/sentry";
 
 export function useAlerts(url: string) {
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -13,9 +14,14 @@ export function useAlerts(url: string) {
 
   const loadAlerts = useCallback(async () => {
     setLoading(true);
-    const loaded = await getAlertsForUrl(url);
-    setAlerts(loaded);
-    setLoading(false);
+    try {
+      const loaded = await getAlertsForUrl(url);
+      setAlerts(loaded);
+    } catch (err) {
+      captureError(err);
+    } finally {
+      setLoading(false);
+    }
   }, [url]);
 
   useEffect(() => {
@@ -24,25 +30,34 @@ export function useAlerts(url: string) {
 
   const addAlert = useCallback(
     async (scope: NoteScope = "page") => {
-      const alert: Alert = {
-        id: crypto.randomUUID(),
-        url,
-        scope,
-        message: "",
-        enabled: true,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      };
-      await saveAlert(alert);
-      setAlerts((prev) => [...prev, alert]);
-      return alert;
+      try {
+        const alert: Alert = {
+          id: crypto.randomUUID(),
+          url,
+          scope,
+          message: "",
+          enabled: true,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+        await saveAlert(alert);
+        setAlerts((prev) => [...prev, alert]);
+        return alert;
+      } catch (err) {
+        captureError(err);
+        return null;
+      }
     },
     [url]
   );
 
   const removeAlert = useCallback(async (alert: Alert) => {
-    await deleteAlert(alert);
-    setAlerts((prev) => prev.filter((a) => a.id !== alert.id));
+    try {
+      await deleteAlert(alert);
+      setAlerts((prev) => prev.filter((a) => a.id !== alert.id));
+    } catch (err) {
+      captureError(err);
+    }
   }, []);
 
   const editAlert = useCallback(
@@ -50,12 +65,16 @@ export function useAlerts(url: string) {
       alert: Alert,
       updates: Partial<Omit<Alert, "id" | "url" | "createdAt">>
     ) => {
-      await updateAlert(alert, updates);
-      setAlerts((prev) =>
-        prev.map((a) =>
-          a.id === alert.id ? { ...a, ...updates, updatedAt: Date.now() } : a
-        )
-      );
+      try {
+        await updateAlert(alert, updates);
+        setAlerts((prev) =>
+          prev.map((a) =>
+            a.id === alert.id ? { ...a, ...updates, updatedAt: Date.now() } : a
+          )
+        );
+      } catch (err) {
+        captureError(err);
+      }
     },
     []
   );

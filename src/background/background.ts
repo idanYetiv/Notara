@@ -1,3 +1,7 @@
+import { initSentry, setSentryUser, captureError } from "../lib/sentry";
+
+initSentry("background");
+
 import { getNoteCountForUrl, migrateFromWebNoter, getAllAlerts } from "../lib/storage";
 import type { Alert, AlertSchedule, MessageAction } from "../lib/types";
 import { getSupabase, isSupabaseConfigured } from "../lib/supabase";
@@ -151,44 +155,56 @@ async function handleGoogleSignIn(): Promise<{ success: boolean; user?: UserProf
     };
 
     await chrome.storage.session.set({ [AUTH_STORAGE_KEY]: user });
+    setSentryUser({ id: user.id, email: user.email });
     return { success: true, user };
   } catch (err) {
+    captureError(err);
     return { success: false, error: err instanceof Error ? err.message : "Unknown error" };
   }
 }
 
 async function handleSignOut(): Promise<void> {
-  const supabase = getSupabase();
-  if (supabase) {
-    await supabase.auth.signOut();
+  try {
+    const supabase = getSupabase();
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
+    await chrome.storage.session.remove(AUTH_STORAGE_KEY);
+    setSentryUser(null);
+  } catch (err) {
+    captureError(err);
   }
-  await chrome.storage.session.remove(AUTH_STORAGE_KEY);
 }
 
 async function getCurrentAuthState(): Promise<{ isAuthenticated: boolean; user: UserProfile | null }> {
-  // Check session cache first
-  const cached = await chrome.storage.session.get(AUTH_STORAGE_KEY);
-  if (cached[AUTH_STORAGE_KEY]) {
-    return { isAuthenticated: true, user: cached[AUTH_STORAGE_KEY] as UserProfile };
-  }
-
-  // Fallback: rehydrate from Supabase persisted session
-  const supabase = getSupabase();
-  if (supabase) {
-    const { data } = await supabase.auth.getSession();
-    if (data.session?.user) {
-      const user: UserProfile = {
-        id: data.session.user.id,
-        email: data.session.user.email ?? "",
-        name: data.session.user.user_metadata?.full_name ?? data.session.user.email ?? "",
-        avatarUrl: data.session.user.user_metadata?.avatar_url ?? "",
-      };
-      await chrome.storage.session.set({ [AUTH_STORAGE_KEY]: user });
-      return { isAuthenticated: true, user };
+  try {
+    // Check session cache first
+    const cached = await chrome.storage.session.get(AUTH_STORAGE_KEY);
+    if (cached[AUTH_STORAGE_KEY]) {
+      return { isAuthenticated: true, user: cached[AUTH_STORAGE_KEY] as UserProfile };
     }
-  }
 
-  return { isAuthenticated: false, user: null };
+    // Fallback: rehydrate from Supabase persisted session
+    const supabase = getSupabase();
+    if (supabase) {
+      const { data } = await supabase.auth.getSession();
+      if (data.session?.user) {
+        const user: UserProfile = {
+          id: data.session.user.id,
+          email: data.session.user.email ?? "",
+          name: data.session.user.user_metadata?.full_name ?? data.session.user.email ?? "",
+          avatarUrl: data.session.user.user_metadata?.avatar_url ?? "",
+        };
+        await chrome.storage.session.set({ [AUTH_STORAGE_KEY]: user });
+        return { isAuthenticated: true, user };
+      }
+    }
+
+    return { isAuthenticated: false, user: null };
+  } catch (err) {
+    captureError(err);
+    return { isAuthenticated: false, user: null };
+  }
 }
 
 // Rehydrate auth on service worker startup
@@ -197,36 +213,81 @@ async function rehydrateAuth(): Promise<void> {
   await getCurrentAuthState();
 }
 
+// --- Feedback handler ---
+
+async function handleSubmitFeedback(message: {
+  feedbackType: string;
+  message: string;
+  url: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabase();
+  if (!supabase) {
+    return { success: false, error: "Supabase not configured" };
+  }
+
+  try {
+    const authState = await getCurrentAuthState();
+    const { error } = await supabase.from("feedback").insert({
+      user_id: authState.user?.id ?? null,
+      email: authState.user?.email ?? null,
+      type: message.feedbackType,
+      message: message.message,
+      url: message.url,
+    });
+
+    if (error) {
+      captureError(new Error(`Feedback insert failed: ${error.message}`));
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err) {
+    captureError(err);
+    return { success: false, error: err instanceof Error ? err.message : "Unknown error" };
+  }
+}
+
 // --- Alarm listener ---
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
-  const alert = await findAlertByAlarmName(alarm.name);
-  if (!alert || !alert.enabled) return;
+  try {
+    const alert = await findAlertByAlarmName(alarm.name);
+    if (!alert || !alert.enabled) return;
 
-  chrome.notifications.create(alarm.name, {
-    type: "basic",
-    iconUrl: "public/icon-128.png",
-    title: "Notara Reminder",
-    message: alert.message || "Scheduled alert",
-  });
+    chrome.notifications.create(alarm.name, {
+      type: "basic",
+      iconUrl: "public/icon-128.png",
+      title: "Notara Reminder",
+      message: alert.message || "Scheduled alert",
+    });
+  } catch (err) {
+    captureError(err);
+  }
 });
 
 // Migrate legacy storage keys & set up context menu
 chrome.runtime.onInstalled.addListener(async () => {
-  await migrateFromWebNoter();
-  chrome.contextMenus.create({
-    id: "notara-add",
-    title: "Add Notara sticky note",
-    contexts: ["page"],
-  });
-  await reregisterAllAlarms();
-  await rehydrateAuth();
+  try {
+    await migrateFromWebNoter();
+    chrome.contextMenus.create({
+      id: "notara-add",
+      title: "Add Notara sticky note",
+      contexts: ["page"],
+    });
+    await reregisterAllAlarms();
+    await rehydrateAuth();
+  } catch (err) {
+    captureError(err);
+  }
 });
 
 // Re-register alarms on service worker startup
 chrome.runtime.onStartup.addListener(async () => {
-  await reregisterAllAlarms();
-  await rehydrateAuth();
+  try {
+    await reregisterAllAlarms();
+    await rehydrateAuth();
+  } catch (err) {
+    captureError(err);
+  }
 });
 
 // Context menu click
@@ -245,7 +306,7 @@ chrome.runtime.onMessage.addListener(
     if (message.type === "GET_NOTE_COUNT") {
       getNoteCountForUrl(message.url).then((count) => {
         sendResponse({ type: "NOTE_COUNT", count });
-      });
+      }).catch(captureError);
       return true;
     }
 
@@ -265,17 +326,22 @@ chrome.runtime.onMessage.addListener(
     }
 
     if (message.type === "SIGN_IN_GOOGLE") {
-      handleGoogleSignIn().then(sendResponse);
+      handleGoogleSignIn().then(sendResponse).catch(captureError);
       return true;
     }
 
     if (message.type === "SIGN_OUT") {
-      handleSignOut().then(() => sendResponse({ success: true }));
+      handleSignOut().then(() => sendResponse({ success: true })).catch(captureError);
       return true;
     }
 
     if (message.type === "GET_AUTH_STATE") {
-      getCurrentAuthState().then(sendResponse);
+      getCurrentAuthState().then(sendResponse).catch(captureError);
+      return true;
+    }
+
+    if (message.type === "SUBMIT_FEEDBACK") {
+      handleSubmitFeedback(message).then(sendResponse);
       return true;
     }
   }
@@ -290,15 +356,23 @@ chrome.action.onClicked.addListener((tab) => {
 
 // Update badge when tab becomes active
 chrome.tabs.onActivated?.addListener(async (activeInfo) => {
-  const tab = await chrome.tabs.get(activeInfo.tabId);
-  if (tab.url) {
-    updateBadge(activeInfo.tabId, tab.url);
+  try {
+    const tab = await chrome.tabs.get(activeInfo.tabId);
+    if (tab.url) {
+      updateBadge(activeInfo.tabId, tab.url);
+    }
+  } catch (err) {
+    captureError(err);
   }
 });
 
 // Update badge when page loads
 chrome.tabs.onUpdated?.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === "complete" && tab.url) {
-    updateBadge(tabId, tab.url);
+  try {
+    if (changeInfo.status === "complete" && tab.url) {
+      updateBadge(tabId, tab.url);
+    }
+  } catch (err) {
+    captureError(err);
   }
 });

@@ -4,6 +4,7 @@ import { getAllNotes, getAllAlerts, deleteNote, deleteAlert, deleteGlobalAlert, 
 import { groupByDomainAndPath } from "../../lib/grouping";
 import type { DomainHierarchy } from "../../lib/grouping";
 import { NOTE_COLORS } from "../../lib/types";
+import { captureError } from "../../lib/sentry";
 
 type Tab = "notes" | "alerts";
 
@@ -44,33 +45,45 @@ export default function GlobalPanel({ onClose }: { onClose: () => void }) {
   };
 
   const handleDeleteNote = async (note: Note) => {
-    await deleteNote(note);
-    await loadData();
+    try {
+      await deleteNote(note);
+      await loadData();
+    } catch (err) {
+      captureError(err);
+    }
   };
 
   const handleDeleteAlert = async (alert: Alert) => {
-    if (alert.scope === "global") {
-      await deleteGlobalAlert(alert.id);
-      if (alert.schedule) {
-        chrome.runtime.sendMessage({ type: "CANCEL_ALERT", alarmName: alert.schedule.alarmName });
+    try {
+      if (alert.scope === "global") {
+        await deleteGlobalAlert(alert.id);
+        if (alert.schedule) {
+          chrome.runtime.sendMessage({ type: "CANCEL_ALERT", alarmName: alert.schedule.alarmName });
+        }
+      } else {
+        await deleteAlert(alert);
       }
-    } else {
-      await deleteAlert(alert);
+      await loadData();
+    } catch (err) {
+      captureError(err);
     }
-    await loadData();
   };
 
   const handleToggleAlert = async (alert: Alert) => {
-    const updates = { enabled: !alert.enabled };
-    await updateAlert(alert, updates);
-    if (alert.schedule) {
-      if (!alert.enabled) {
-        chrome.runtime.sendMessage({ type: "SCHEDULE_ALERT", alert: { ...alert, ...updates } });
-      } else {
-        chrome.runtime.sendMessage({ type: "CANCEL_ALERT", alarmName: alert.schedule.alarmName });
+    try {
+      const updates = { enabled: !alert.enabled };
+      await updateAlert(alert, updates);
+      if (alert.schedule) {
+        if (!alert.enabled) {
+          chrome.runtime.sendMessage({ type: "SCHEDULE_ALERT", alert: { ...alert, ...updates } });
+        } else {
+          chrome.runtime.sendMessage({ type: "CANCEL_ALERT", alarmName: alert.schedule.alarmName });
+        }
       }
+      await loadData();
+    } catch (err) {
+      captureError(err);
     }
-    await loadData();
   };
 
   const groups = tab === "notes" ? noteGroups : [];
