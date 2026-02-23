@@ -62,4 +62,5 @@ export type MessageAction =
   | { type: "SIGN_IN_GOOGLE" }
   | { type: "SIGN_OUT" }
   | { type: "GET_AUTH_STATE" }
-  | { type: "TOGGLE_PANEL" };
+  | { type: "TOGGLE_PANEL" }
+  | { type: "SUBMIT_FEEDBACK"; feedbackType: "bug" | "feature" | "other"; message: string; url: string };

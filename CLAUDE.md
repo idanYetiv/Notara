@@ -121,4 +121,42 @@ npm run test:run     # Single run tests
 
 ---
 
-*Last updated: February 21, 2026*
+## 8. Error Monitoring (Sentry)
+
+- **Package:** `@sentry/browser` — initialized in both content script and background worker
+- **Config:** `src/lib/sentry.ts` — `initSentry(context)` and `setSentryUser(user)` helpers
+- DSN from `VITE_SENTRY_DSN` env var — gracefully skips if not set
+- `beforeSend` hook scrubs auth tokens from breadcrumbs
+- CSP in manifest.json allows `connect-src https://*.ingest.sentry.io`
+
+---
+
+## 9. In-App Feedback
+
+- **Widget:** `src/content/components/FeedbackWidget.tsx` — slide-up form inside FloatingPanel
+- **Backend:** `SUBMIT_FEEDBACK` message handler in background.ts inserts into Supabase `feedback` table
+- Requires Supabase `feedback` table with RLS (see plan SQL)
+- Types: bug, feature, other — available to signed-in users only
+
+---
+
+## 10. Documentation
+
+- **Sales pitch & use cases**: `docs/SALES-PITCH.md` — one-liner, problem/solution, 3 use cases, key selling points
+- **System design**: `docs/SYSTEM-DESIGN.md` — architecture overview, storage schema, auth flow, message protocol, alarm system, freemium model, screenshot capture, permissions, future roadmap
+- **Landing page**: `landing/index.html` — self-contained marketing page (HTML+CSS+JS, no build step). Dark/premium design with neon cyan accent. CWS links use `#` placeholder until store listing is live.
+- **Demo storyboard**: `landing/demo.html` — 5-step CSS-animated walkthrough for screen recording / social media. Pure CSS, no JS.
+
+---
+
+## 9. Chrome Web Store Assets
+
+- **Promotional mockups**: `tools/generate-assets.html` — open in Chrome, capture node screenshots via DevTools
+- 4 screenshots (1280x800): Hero, Note Editor, Sign In, Alerts & Organization
+- 1 small promo tile (440x280): Logo + tagline on dark background
+- Uses actual Notara branding and color palette
+- **Status**: Mockups ready, need to capture PNGs
+
+---
+
+*Last updated: February 23, 2026*
