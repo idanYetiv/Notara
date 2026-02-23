@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { AuthState } from "../lib/auth";
 import { AUTH_STORAGE_KEY } from "../lib/auth";
 import { captureError } from "../lib/sentry";
+import { trackEvent } from "../lib/posthog";
 
 const DEFAULT_STATE: AuthState = { isAuthenticated: false, user: null, loading: true };
 
@@ -49,6 +50,7 @@ export function useAuth() {
         setAuthState((prev) => ({ ...prev, loading: false }));
         return;
       }
+      trackEvent("signed_in");
       setAuthState({
         isAuthenticated: true,
         user: response.user,
@@ -59,6 +61,7 @@ export function useAuth() {
 
   function signOut() {
     try {
+      trackEvent("signed_out");
       setAuthState((prev) => ({ ...prev, loading: true }));
       chrome.runtime.sendMessage({ type: "SIGN_OUT" }, () => {
         if (chrome.runtime.lastError) {

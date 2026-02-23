@@ -27,5 +27,8 @@
     }
   ],
   "permissions": ["storage", "activeTab", "contextMenus", "alarms", "notifications", "identity"],
-  "host_permissions": ["<all_urls>"]
+  "host_permissions": ["<all_urls>"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; connect-src 'self' https://*.supabase.co https://us.i.posthog.com; object-src 'self'"
+  }
 }

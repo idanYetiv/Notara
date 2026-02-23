@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { captureScreenshot, createThumbnail } from "../lib/screenshot";
 import { captureError } from "../lib/sentry";
+import { trackEvent } from "../lib/posthog";
 
 export function useScreenshot() {
   const [capturing, setCapturing] = useState(false);
@@ -10,6 +11,7 @@ export function useScreenshot() {
     try {
       const full = await captureScreenshot();
       const thumbnail = await createThumbnail(full);
+      trackEvent("screenshot_captured");
       return thumbnail;
     } catch (err) {
       console.error("Screenshot capture failed:", err);
