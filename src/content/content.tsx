@@ -1,3 +1,9 @@
+import { initSentry } from "../lib/sentry";
+import { initPostHog } from "../lib/posthog";
+
+initSentry("content");
+initPostHog("content");
+
 import { createRoot } from "react-dom/client";
 import ContentApp from "./ContentApp";
 

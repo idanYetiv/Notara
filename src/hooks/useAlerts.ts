@@ -7,6 +7,7 @@ import {
   updateAlert,
 } from "../lib/storage";
 import { captureError } from "../lib/sentry";
+import { trackEvent } from "../lib/posthog";
 
 export function useAlerts(url: string) {
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -42,6 +43,7 @@ export function useAlerts(url: string) {
         };
         await saveAlert(alert);
         setAlerts((prev) => [...prev, alert]);
+        trackEvent("alert_created", { scope });
         return alert;
       } catch (err) {
         captureError(err);
@@ -55,6 +57,7 @@ export function useAlerts(url: string) {
     try {
       await deleteAlert(alert);
       setAlerts((prev) => prev.filter((a) => a.id !== alert.id));
+      trackEvent("alert_deleted");
     } catch (err) {
       captureError(err);
     }

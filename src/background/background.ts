@@ -1,6 +1,8 @@
 import { initSentry, setSentryUser, captureError } from "../lib/sentry";
+import { initPostHog, identifyUser } from "../lib/posthog";
 
 initSentry("background");
+initPostHog("background");
 
 import { getNoteCountForUrl, migrateFromWebNoter, getAllAlerts } from "../lib/storage";
 import type { Alert, AlertSchedule, MessageAction } from "../lib/types";
@@ -156,6 +158,7 @@ async function handleGoogleSignIn(): Promise<{ success: boolean; user?: UserProf
 
     await chrome.storage.session.set({ [AUTH_STORAGE_KEY]: user });
     setSentryUser({ id: user.id, email: user.email });
+    identifyUser({ id: user.id, email: user.email });
     return { success: true, user };
   } catch (err) {
     captureError(err);
@@ -171,6 +174,7 @@ async function handleSignOut(): Promise<void> {
     }
     await chrome.storage.session.remove(AUTH_STORAGE_KEY);
     setSentryUser(null);
+    identifyUser(null);
   } catch (err) {
     captureError(err);
   }

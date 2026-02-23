@@ -9,6 +9,7 @@ import {
 } from "../lib/storage";
 import { canCreateNote } from "../lib/freemium";
 import { captureError } from "../lib/sentry";
+import { trackEvent } from "../lib/posthog";
 
 export function useNotes(url: string) {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -57,6 +58,7 @@ export function useNotes(url: string) {
         };
         await saveNote(note);
         setNotes((prev) => [...prev, note]);
+        trackEvent("note_created", { scope });
         return note;
       } catch (err) {
         captureError(err);
@@ -70,6 +72,7 @@ export function useNotes(url: string) {
     try {
       await deleteNote(note);
       setNotes((prev) => prev.filter((n) => n.id !== note.id));
+      trackEvent("note_deleted");
     } catch (err) {
       captureError(err);
     }
@@ -87,6 +90,7 @@ export function useNotes(url: string) {
             n.id === note.id ? { ...n, ...updates, updatedAt: Date.now() } : n
           )
         );
+        trackEvent("note_edited", { fields: Object.keys(updates) });
       } catch (err) {
         captureError(err);
       }
