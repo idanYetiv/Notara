@@ -7,6 +7,7 @@ import { saveGlobalAlert } from "../../lib/storage";
 import { useAuth } from "../../hooks/useAuth";
 import GlobalPanel from "./GlobalPanel";
 import ScheduleModal from "./ScheduleModal";
+import FeedbackWidget from "./FeedbackWidget";
 
 interface FloatingPanelProps {
   notes: Note[];
@@ -19,7 +20,7 @@ interface FloatingPanelProps {
   ) => void;
   onToggleScope: (note: Note) => void;
   alerts: Alert[];
-  onAddAlert: (scope?: NoteScope) => Promise<Alert>;
+  onAddAlert: (scope?: NoteScope) => Promise<Alert | null>;
   onDeleteAlert: (alert: Alert) => void;
   onEditAlert: (
     alert: Alert,
@@ -139,6 +140,7 @@ export default function FloatingPanel({
   const [colorPickerId, setColorPickerId] = useState<string | null>(null);
   const [globalPanelOpen, setGlobalPanelOpen] = useState(false);
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const { onMouseDown, wasDragged } = useDrag(panelRef);
 
@@ -158,7 +160,7 @@ export default function FloatingPanel({
 
   const handleAddAlert = async () => {
     const alert = await onAddAlert(autoScope);
-    setEditingAlertId(alert.id);
+    if (alert) setEditingAlertId(alert.id);
   };
 
   const handleScheduleAlertSave = async (message: string, schedule: AlertSchedule) => {
@@ -591,12 +593,20 @@ export default function FloatingPanel({
             {auth.user?.name}
           </span>
           <button
+            onClick={() => setFeedbackOpen(true)}
+            style={{ background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#64748b", padding: "2px 4px", lineHeight: 1 }}
+            title="Send feedback"
+          >
+            {"\uD83D\uDCAC"}
+          </button>
+          <button
             onClick={auth.signOut}
             style={{ background: "none", border: "none", cursor: "pointer", fontSize: "10px", color: "#64748b", padding: "2px 4px" }}
           >
             Sign out
           </button>
         </div>
+        {feedbackOpen && <FeedbackWidget onClose={() => setFeedbackOpen(false)} />}
         </>
       )}
       </div>{/* end inner content wrapper */}
