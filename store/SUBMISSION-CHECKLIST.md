@@ -143,11 +143,9 @@ Answer the CWS privacy practices questions as follows:
 
 Enter the URL where your privacy policy is hosted.
 
-Options:
-- GitHub Pages: `https://idanyetiv.github.io/Notara/docs/privacy-policy.html`
-- Or host `docs/privacy-policy.html` anywhere publicly accessible
+**Privacy Policy URL:** `https://idanyetiv.github.io/Notara/privacy-policy.html`
 
-> **Note:** The privacy policy URL must be publicly accessible — CWS reviewers will verify it.
+> GitHub Pages is already enabled on this repo (source: `main:/docs`). The URL above is live.
 
 ---
 
