@@ -7,7 +7,7 @@
 ## 1. Session Setup (REQUIRED)
 
 ```bash
-cd ~/Notara
+cd ~/projects/Notara
 git config user.name "idanYetiv"
 git config user.email "idanyativ@gmail.com"
 ```
@@ -63,7 +63,7 @@ git checkout main && git pull
 ## 4. Project Structure
 
 ```
-~/Notara/
+~/projects/Notara/
 ├── CLAUDE.md              # This file
 ├── .env.example           # Supabase + Google OAuth credentials template
 ├── manifest.json          # Chrome Extension Manifest V3

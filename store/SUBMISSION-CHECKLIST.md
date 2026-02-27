@@ -14,7 +14,7 @@ Step-by-step guide to submit Notara to the Chrome Web Store.
 ## Step 1: Build the Extension
 
 ```bash
-cd ~/Notara
+cd ~/projects/Notara
 npm run build
 ```
 
