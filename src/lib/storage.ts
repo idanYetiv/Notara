@@ -1,4 +1,5 @@
 import type { Alert, Note, NoteScope } from "./types";
+import { sanitizeNoteText, sanitizeScreenshot, sanitizeAlertMessage } from "./sanitize";
 
 const PAGE_PREFIX = "notara_page_";
 const SITE_PREFIX = "notara_site_";
@@ -90,13 +91,18 @@ export async function getNotesForUrl(url: string): Promise<Note[]> {
 }
 
 export async function saveNote(note: Note): Promise<void> {
-  const key = noteStorageKey(note);
+  const sanitized: Note = {
+    ...note,
+    text: sanitizeNoteText(note.text),
+    screenshot: sanitizeScreenshot(note.screenshot),
+  };
+  const key = noteStorageKey(sanitized);
   const notes = await getNotesForKey(key);
-  const existing = notes.findIndex((n) => n.id === note.id);
+  const existing = notes.findIndex((n) => n.id === sanitized.id);
   if (existing >= 0) {
-    notes[existing] = note;
+    notes[existing] = sanitized;
   } else {
-    notes.push(note);
+    notes.push(sanitized);
   }
   await chrome.storage.sync.set({ [key]: notes });
 }
@@ -120,7 +126,12 @@ export async function updateNote(
   const notes = await getNotesForKey(key);
   const index = notes.findIndex((n) => n.id === note.id);
   if (index < 0) return;
-  notes[index] = { ...notes[index], ...updates, updatedAt: Date.now() };
+  const sanitizedUpdates = {
+    ...updates,
+    ...(updates.text !== undefined ? { text: sanitizeNoteText(updates.text) } : {}),
+    ...("screenshot" in updates ? { screenshot: sanitizeScreenshot(updates.screenshot) } : {}),
+  };
+  notes[index] = { ...notes[index], ...sanitizedUpdates, updatedAt: Date.now() };
   await chrome.storage.sync.set({ [key]: notes });
 }
 
@@ -187,13 +198,17 @@ export async function getAlertsForUrl(url: string): Promise<Alert[]> {
 }
 
 export async function saveAlert(alert: Alert): Promise<void> {
-  const key = alertStorageKey(alert);
+  const sanitized: Alert = {
+    ...alert,
+    message: sanitizeAlertMessage(alert.message),
+  };
+  const key = alertStorageKey(sanitized);
   const alerts = await getAlertsForKey(key);
-  const existing = alerts.findIndex((a) => a.id === alert.id);
+  const existing = alerts.findIndex((a) => a.id === sanitized.id);
   if (existing >= 0) {
-    alerts[existing] = alert;
+    alerts[existing] = sanitized;
   } else {
-    alerts.push(alert);
+    alerts.push(sanitized);
   }
   await chrome.storage.sync.set({ [key]: alerts });
 }
@@ -217,7 +232,11 @@ export async function updateAlert(
   const alerts = await getAlertsForKey(key);
   const index = alerts.findIndex((a) => a.id === alert.id);
   if (index < 0) return;
-  alerts[index] = { ...alerts[index], ...updates, updatedAt: Date.now() };
+  const sanitizedUpdates = {
+    ...updates,
+    ...(updates.message !== undefined ? { message: sanitizeAlertMessage(updates.message) } : {}),
+  };
+  alerts[index] = { ...alerts[index], ...sanitizedUpdates, updatedAt: Date.now() };
   await chrome.storage.sync.set({ [key]: alerts });
 }
 
@@ -243,13 +262,17 @@ export async function getAllAlerts(): Promise<Record<string, Alert[]>> {
 
 /** Save a global alert (stored individually by ID). */
 export async function saveGlobalAlert(alert: Alert): Promise<void> {
+  const sanitized: Alert = {
+    ...alert,
+    message: sanitizeAlertMessage(alert.message),
+  };
   const key = `${ALERT_GLOBAL_PREFIX}all`;
   const alerts = await getAlertsForKey(key);
-  const existing = alerts.findIndex((a) => a.id === alert.id);
+  const existing = alerts.findIndex((a) => a.id === sanitized.id);
   if (existing >= 0) {
-    alerts[existing] = alert;
+    alerts[existing] = sanitized;
   } else {
-    alerts.push(alert);
+    alerts.push(sanitized);
   }
   await chrome.storage.sync.set({ [key]: alerts });
 }

@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { Alert, AlertSchedule, Note, NoteColor, NoteScope } from "../../lib/types";
 import { NOTE_COLORS } from "../../lib/types";
+import { sanitizeScreenshot } from "../../lib/sanitize";
 import { useScreenshot } from "../../hooks/useScreenshot";
 import { FREE_NOTE_LIMIT } from "../../lib/freemium";
 import { saveGlobalAlert } from "../../lib/storage";
@@ -856,11 +857,11 @@ function NoteCard({
         </div>
       )}
 
-      {/* Screenshot thumbnail */}
-      {note.screenshot && (
+      {/* Screenshot thumbnail — validated to be a safe data URL */}
+      {sanitizeScreenshot(note.screenshot) && (
         <div style={{ padding: "0 10px 8px" }}>
           <img
-            src={note.screenshot}
+            src={sanitizeScreenshot(note.screenshot)}
             alt="Screenshot"
             style={{ width: "100%", borderRadius: "6px", display: "block" }}
           />
