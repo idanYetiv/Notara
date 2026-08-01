@@ -1,6 +1,7 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import type { Note, NoteColor } from "../../lib/types";
 import { NOTE_COLORS } from "../../lib/types";
+import { sanitizeScreenshot } from "../../lib/sanitize";
 import NoteEditor from "./NoteEditor";
 import ScreenshotButton from "./ScreenshotButton";
 
@@ -92,6 +93,7 @@ export default function StickyNote({
 
   const bgColor = NOTE_COLORS[note.color];
   const isSiteScope = note.scope === "site";
+  const validScreenshot = useMemo(() => sanitizeScreenshot(note.screenshot), [note.screenshot]);
 
   return (
     <div
@@ -257,7 +259,7 @@ export default function StickyNote({
           </div>
 
           {/* Screenshot thumbnail */}
-          {note.screenshot && (
+          {validScreenshot && (
             <div
               data-no-drag
               style={{
@@ -266,7 +268,7 @@ export default function StickyNote({
               }}
             >
               <img
-                src={note.screenshot}
+                src={validScreenshot}
                 alt="Screenshot"
                 style={{
                   width: "100%",
