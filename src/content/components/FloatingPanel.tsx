@@ -224,15 +224,11 @@ export default function FloatingPanel({
           }}
           title="Open Notara"
         >
-          {notes.length > 0 ? (
-            <span style={{ fontSize: "10px", pointerEvents: "none" }}>
-              {notes.length}/{FREE_NOTE_LIMIT}
-            </span>
-          ) : (
-            <span style={{ fontSize: "20px", pointerEvents: "none" }}>
-              {"\u{1F4DD}"}
-            </span>
-          )}
+          <img
+            src={chrome.runtime.getURL("public/icon-128.png")}
+            alt="Notara"
+            style={{ width: "32px", height: "32px", borderRadius: "50%", pointerEvents: "none" }}
+          />
         </div>
         {/* Close (X) button */}
         <button
@@ -321,6 +317,11 @@ export default function FloatingPanel({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <img
+            src={chrome.runtime.getURL("public/icon-128.png")}
+            alt=""
+            style={{ width: "20px", height: "20px", borderRadius: "4px" }}
+          />
           <span style={{ fontSize: "18px", fontWeight: "bold", color: "#00d4ff" }}>
             Notara
           </span>

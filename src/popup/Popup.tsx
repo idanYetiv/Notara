@@ -55,7 +55,10 @@ export default function Popup() {
       {/* Header */}
       <div className="p-4" style={{ backgroundColor: "#1a1a2e", borderBottom: "1px solid #2a2a40" }}>
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-bold" style={{ color: "#00d4ff" }}>Notara</h1>
+          <div className="flex items-center gap-2">
+            <img src={chrome.runtime.getURL("public/icon-128.png")} alt="" style={{ width: "20px", height: "20px", borderRadius: "4px" }} />
+            <h1 className="text-lg font-bold" style={{ color: "#00d4ff" }}>Notara</h1>
+          </div>
           <span className="text-sm px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(0,212,255,0.15)", color: atLimit ? "#f87171" : "#00d4ff" }}>
             {totalNotes} / {FREE_NOTE_LIMIT} notes
           </span>
