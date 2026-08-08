@@ -11,7 +11,18 @@ export function useAuth() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchAuthState = useCallback(() => {
+    let responded = false;
+    const timeout = setTimeout(() => {
+      if (!responded) {
+        responded = true;
+        setAuthState({ isAuthenticated: false, user: null, loading: false });
+      }
+    }, 5000);
+
     chrome.runtime.sendMessage({ type: "GET_AUTH_STATE" }, (response) => {
+      if (responded) return;
+      responded = true;
+      clearTimeout(timeout);
       if (chrome.runtime.lastError) {
         setAuthState({ isAuthenticated: false, user: null, loading: false });
         return;
