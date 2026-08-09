@@ -42,6 +42,7 @@ git checkout main && git pull
 **Notara** — A Chrome extension that lets users write and save floating sticky notes on any website, with screenshot capture. Dark & sleek visual identity with neon cyan accents.
 
 **Target:** Chrome Web Store distribution.
+**Status:** v1.0.0 submitted to Chrome Web Store for review (August 2026).
 
 ---
 
@@ -140,7 +141,15 @@ npm run test:run     # Single run tests
 
 ---
 
-## 10. Documentation
+## 10. Privacy Policy
+
+- **File:** `docs/privacy-policy.html`
+- **Live URL:** `https://idanyetiv.github.io/Notara/privacy-policy.html` (served via GitHub Pages from `main:/docs`)
+- Discloses: Google OAuth, Supabase, PostHog analytics, Sentry error monitoring
+
+---
+
+## 11. Documentation
 
 - **Sales pitch & use cases**: `docs/SALES-PITCH.md` — one-liner, problem/solution, 3 use cases, key selling points
 - **System design**: `docs/SYSTEM-DESIGN.md` — architecture overview, storage schema, auth flow, message protocol, alarm system, freemium model, screenshot capture, permissions, future roadmap
@@ -149,14 +158,28 @@ npm run test:run     # Single run tests
 
 ---
 
-## 9. Chrome Web Store Assets
+## 12. Chrome Web Store Assets
 
 - **Promotional mockups**: `tools/generate-assets.html` — open in Chrome, capture node screenshots via DevTools
-- 4 screenshots (1280x800): Hero, Note Editor, Sign In, Alerts & Organization
-- 1 small promo tile (440x280): Logo + tagline on dark background
-- Uses actual Notara branding and color palette
-- **Status**: Mockups ready, need to capture PNGs
+- 5 screenshots (1280x800): `public/scr.png` through `public/scr4.png`
+- 1 small promo tile (440x280): `public/promo-tile-440x280.png`
+- **Store listing copy**: `store/listing.md`
+- **Submission checklist**: `store/SUBMISSION-CHECKLIST.md`
+- **Status**: v1.0.0 submitted to CWS for review ✅
+
+## 13. Branding
+
+- **Otter logo** (square, neon cyan on dark): `public/notara-icon.png` (2048x2048 source)
+- **Wordmark banner**: `public/notara-icon2.png` (3712x1152)
+- Resized icons: `public/icon-128.png`, `public/icon-48.png`, `public/icon-16.png`
+- Otter icon displayed in: toolbar, extensions page, floating panel (minimized + header), popup header
+- Icons listed in `web_accessible_resources` in manifest for content script access
+
+## 14. Post-Approval TODO
+
+- Replace `href="#"` placeholder links in `landing/index.html` (4 instances) with actual CWS URL
+- Redeploy landing page to GitHub Pages
 
 ---
 
-*Last updated: February 23, 2026*
+*Last updated: August 9, 2026*
